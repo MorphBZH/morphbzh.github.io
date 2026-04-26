@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamersyde - YouTube Anti-Smiley</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; background-color: #f4f4f9; }
+        h2 { color: #333; }
+        textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; }
+        button { background-color: #FFA300; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        button:hover { background-color: #F49F00; }
+        .result-container { margin-top: 20px; }
+        .info { font-size: 0.9em; color: #666; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <h2>Gamersyde - YouTube Anti-Smiley (xD, :D, :P)</h2>
+    <p class="info">Collez vos liens YouTube ci-dessous (un par ligne) :</p>
+    
+    <textarea id="inputLinks" placeholder="https://www.youtube.com/watch?v=AbCdExD..."></textarea>
+    
+    <button onclick="convertLinks()">Convertir</button>
+
+    <div class="result-container">
+        <p class="info">Résultat purifié (prêt à copier) :</p>
+        <textarea id="outputLinks" readonly></textarea>
+    </div>
+
+    <script>
+        function convertLinks() {
+            const input = document.getElementById('inputLinks').value;
+            const lines = input.split('\n');
+            let result = "";
+
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+                if (trimmedLine === "") return;
+
+                // Extraction de l'ID vidéo (recherche de v= ou gestion du lien court youtu.be)
+                let videoId = "";
+                if (trimmedLine.includes('v=')) {
+                    videoId = trimmedLine.split('v=')[1].split('&')[0].substring(0, 11);
+                } else if (trimmedLine.includes('youtu.be/')) {
+                    videoId = trimmedLine.split('youtu.be/')[1].split('?')[0].substring(0, 11);
+                }
+
+                if (videoId) {
+                    // Application du Percent-encoding pour neutraliser les smileys
+                    // x -> %78 | D -> %44 | P -> %50
+                    let safeId = videoId
+                        .replace(/x/g, '%78')
+                        .replace(/D/g, '%44')
+                        .replace(/P/g, '%50');
+
+                    const cleanUrl = `https://www.youtube.com/watch?v=${safeId}`;
+                    
+                    result += `${cleanUrl}\n`;
+                } else {
+                    // Si la ligne n'est pas un lien valide, on la laisse telle quelle
+                    result += trimmedLine + "\n";
+                }
+            });
+
+            document.getElementById('outputLinks').value = result;
+        }
+    </script>
+
+</body>
+</html>
